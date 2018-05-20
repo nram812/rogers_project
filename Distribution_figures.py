@@ -62,9 +62,10 @@ def plotting_para_hidden():
 
 """the functions above are for plotting purposes , the code below is to plot histogram plots for research"""
 import numpy as np
-str1='/Users/neeleshrampal/OneDrive/Honours Research/colocation/Cloud_phase_dataset_ice_reset1.npy'
-str2='/Users/neeleshrampal/OneDrive/Honours Research/colocation/Cloud_phase_dataset_water_reset1.npy'
-
+#str1='/Users/neeleshrampal/OneDrive/Honours Research/colocation/Cloud_phase_dataset_ice_reset1.npy'
+#str2='/Users/neeleshrampal/OneDrive/Honours Research/colocation/Cloud_phase_dataset_water_reset1.npy'
+str2='C:/Users/Neelesh/OneDrive/Honours Research/colocation/Cloud_phase_dataset_water_reset1.npy'
+str1='C:/Users/Neelesh/OneDrive/Honours Research/colocation/Cloud_phase_dataset_ice_reset1.npy'
 #note that the above two files are converted for the MACOS system and the below commands need to be chanaged for PC
 x=np.load(str1)#ice dataset
 x1=np.load(str2)#water dataset
