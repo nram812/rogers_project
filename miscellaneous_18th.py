@@ -133,6 +133,39 @@ def btd1(mod, rad):
     # plot the brightness temperature differences too.
     sds = f.select('EV_500_Aggr1km_RefSB')
     band_6_r = sds.get()[-1] * sds.attributes()['reflectance_scales'][-1]
+#note the function has been written for simplicity
 
+def figures():
+    from mpl_toolkits.basemap import Basemap
+    import numpy as np
+    import matplotlib.pyplot as plt
+    plt.figure()
+    # setup north polar stereographic basemap.
+    # The longitude lon_0 is at 6-o'clock, and the
+    # latitude circle boundinglat is tangent to the edge
+    # of the map at lon_0. Default value of lat_ts
+    # (latitude of true scale) is pole.
+    m = Basemap(projection='spstere', boundinglat=-30, lon_0=90, resolution='l')
+    m.drawcoastlines()
+    X,Y=m(np.repeat(np.repeat(lat2,5,axis=0),5,axis=1).reshape(2030,1350, order='F'),np.repeat(np.repeat(lon2,5,axis=0),5,axis=1).reshape(2030,1350,order='F'))
+    #m.fillcontinents(color='coral', lake_color='aqua')
+    m.pcolor(Y,X,colour[1,:,:1350])
+    plt.show()
+    #doesnt quite work
+    #TODO fix the bug in this code
+
+
+    # draw parallels and meridians.
+    m.drawparallels(np.arange(-80., 81., 20.))
+    m.drawmeridians(np.arange(-180., 181., 20.))
+    m.drawmapboundary(fill_color='aqua')
+    # draw tissot's indicatrix to show distortion.
+    ax = plt.gca()
+    for y in np.linspace(19 * m.ymin / 20, m.ymin / 20, 10):
+        for x in np.linspace(19 * m.xmin / 20, m.xmin / 20, 10):
+            lon, lat = m(x, y, inverse=True)
+            poly = m.tissot(lon, lat, 2.5, 100, \
+                            facecolor='green', zorder=10, alpha=0.5)
+    plt.title("South Polar Stereographic Projection")
 
 
