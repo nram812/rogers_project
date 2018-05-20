@@ -3,3 +3,4 @@ def f(X):
 def y(x):
     return y(x)**2
 print y(2)
+#chur the boys
