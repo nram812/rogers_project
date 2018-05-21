@@ -70,7 +70,7 @@ str1='C:/Users/Neelesh/OneDrive/Honours Research/colocation/Cloud_phase_dataset_
 x=np.load(str1)#ice dataset
 x1=np.load(str2)#water dataset
 #let us create the a similar figure to that of MODIS algorithm
-y=np.nansum(x,axis=3)#a sum over all possible alitutdes
+y=np.nansum(x,axis=3)#a sum over all possible files
 y1=np.nansum(x1,axis=3)
 """it is entirely neccessary to sum over the axis as there each index (axis 3) represents an independant height layer"""
 
@@ -88,11 +88,25 @@ def plot(x,y):
 #the figure here makes it easier to plot normal figures, two examples shown below
 #plot(temp,np.nansum(y[i],axis=(0,1))/np.nansum(np.nansum(y[i],axis=(0,1))))
 #plot(temp,y[i,j,0]/sum(y[i,j,0]))
-
+#TODO check sum of all altitudes
+y11=sum(y,axis=2)#sum(y,axis=2)
+y12=sum(y1,axis=2)
 temp=np.arange(231,290,1)
-i=3
-j=0
+i=0
+j=0# hemisphere
+k=2
 plotting_para()
+fig, ax1 = plt.subplots(dpi=100)#how to use figsie paramter
+
+#the bar graphs are shaped (x position, y position, width, align=(center, edge))
+ax1.bar(temp,y11[i,j]/sum(y11[i,j]),0.7,alpha=0.8,color='b')
+ax1.bar(temp,y12[i,j]/sum(y12[i,j]),0.7,alpha=0.7,color='r')
+#TODO more collocation work as results are not the same
+ax1.set_xlabel('MODIS Cloud Top Temperature 1km')
+ax1.set_ylabel('Normalised Probability')
+ax1.legend(['CALIOP Ice','CALIOP Liquid'])
+ax1.set_title('Temperature distributions of Liquid and Ice clouds in Low Altitude SO caliop')
+fig.show()
 """note that the figure for clouds over the southern ocean, has more probable cloud around 270 K which is
 due to the higher frequency of low cloud that exists over the SO"""
 
@@ -106,17 +120,7 @@ import matplotlib.pyplot as plt
 bins=temp
 """what is the width and height used in each of the other figures"""
 #width,height=20,21#TODO check what this is "
-fig, ax1 = plt.subplots(dpi=100)#how to use figsie paramter
 
-#the bar graphs are shaped (x position, y position, width, align=(center, edge))
-ax1.bar(temp,y[i,j,0],0.7,alpha=0.8)
-ax1.bar(temp,y1[i,j,2]/sum(y1[i,j,2]),0.7,alpha=0.4,color='r')
-
-ax1.set_xlabel('MODIS Cloud Top Temperature 1km')
-ax1.set_ylabel('Normalised Probability')
-ax1.legend(['MODIS Ice','MODIS Liquid'])
-ax1.set_title('MODIS ')
-fig.show()
 #TODO altitude and use the figure to explain how the distribution changes
 #between high and low cloud
 
