@@ -1,5 +1,7 @@
 #this document contains all the calipso functions
 def plotting_para():
+    import matplotlib.pyplot as plt
+    global plt
     plt.style.use('seaborn-white')
     
     plt.rcParams['font.family'] = 'serif'
