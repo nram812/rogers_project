@@ -89,21 +89,16 @@ def geturl(url, token=None, out=None):
 
 DESC = "This script will recursively download all files if they don't exist from a LAADS URL and stores them to the specified path"
 
-import numpy as np
-global np
 
 def sync(src, dest, tok):
     '''synchronize src url with dest directory'''
     try:
         import csv
         files = [ f for f in csv.DictReader(StringIO(geturl('%s.csv' % src, tok)), skipinitialspace=True) ]
-
     except ImportError:
         import json
         files = json.loads(geturl(src + '.json', tok))
 
-        """only thing that i have added"""
-    np.save('files_chur_25th_may',files)
     # use os.path since python 2/3 both support it while pathlib is 3.4+
     for f in files:
         # currently we use filesize of 0 to indicate directory
@@ -132,22 +127,54 @@ def sync(src, dest, tok):
     return 0
 
 
-def _main(argv):
-    parser = argparse.ArgumentParser(prog=argv[0], description=DESC)
-    parser.add_argument('-s', '--source', dest='source', metavar='URL', help='Recursively download files at URL', required=True)
-    parser.add_argument('-d', '--destination', dest='destination', metavar='DIR', help='Store directory structure in DIR', required=True)
-    parser.add_argument('-t', '--token', dest='token', metavar='TOK', help='Use app token TOK to authenticate', required=True)
-    args = parser.parse_args(argv[1:])
-    if not os.path.exists(args.destination):
-        os.makedirs(args.destination)
-    return sync(args.source, args.destination, args.token)
+dest="C:/Users/Neelesh/Desktop"
+tok="D608F41E-5B5F-11E8-B396-C91EAE849760"
+#sync(src,dest,tok)
+import numpy as np
+import os
+years=np.arange(2000,2017,dtype=int)
+days=np.arange(1,366)
+days_leap=np.arange(1,367)
+leap_year=np.arange(2000,2018,4)
+for year in years:
+    if str(year) in str(leap_year):
+        for day in days_leap
+            dir_time = str(year) + '/' + str(day) + '/'
+            if not os.path.exists(dest+dir_time):
+                os.makedirs(dest+dir_time)
+                sync('https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/61/MOD08_D3/'+dir_time,dest+dir_time,tok)
+                print "downloaded year:" + str(year) + "day:" + str(day)
+    else:
+
+        for day in days:
+            dir_time=str(year)+'/'+str(day)+'/'
+            if not os.path.exists(dest+dir_time):
+                os.makedirs(dest+dir_time)
+                sync('https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/61/MOD08_D3/'+dir_time,dest+dir_time,tok)
+                print "downloaded year:"+str(year)+"day:"+str(day)
 
 
-if __name__ == '__main__':
-    try:
-        sys.exit(_main(sys.argv))
-    except KeyboardInterrupt:
-        sys.exit(-1)
- #"""The script can be executed in terminal as so"""
 
-#python laads-data-download.py -s "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/6/MOD06_L2/2007/018/" -d "/Users/neeleshrampal/Desktop/" -t "D608F41E-5B5F-11E8-B396-C91EAE849760"
+
+
+
+
+#def _main(argv):
+ #   parser = argparse.ArgumentParser(prog=argv[0], description=DESC)
+ #   parser.add_argument('-s', '--source', dest='source', metavar='URL', help='Recursively download files at URL', required=True)
+ #   parser.add_argument('-d', '--destination', dest='destination', metavar='DIR', help='Store directory structure in DIR', required=True)
+ #   parser.add_argument('-t', '--token', dest='token', metavar='TOK', help='Use app token TOK to authenticate', required=True)
+ #   args = parser.parse_args(argv[1:])
+ #   if not os.path.exists(args.destination):
+ #       os.makedirs(args.destination)
+ #   return sync(args.source, args.destination, args.token)
+
+
+#if __name__ == '__main__':
+#    try:
+#        sys.exit(_main(sys.argv))
+ #   except KeyboardInterrupt:
+  #      sys.exit(-1)
+
+
+#python laads-data-download.py -s "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/6/MOD06_L2/2014/" -d "E:/2014" -t "D608F41E-5B5F-11E8-B396-C91EAE849760"
