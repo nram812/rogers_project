@@ -126,33 +126,33 @@ def sync(src, dest, tok):
                 sys.exit(-1)
     return 0
 
+def _main():
+    dest="/Volumes/Promise1/Neelesh/"
+    tok="D608F41E-5B5F-11E8-B396-C91EAE849760"
+    #sync(src,dest,tok)
+    import numpy as np
+    import os
+    years=range(2000,2014)+range(2015,2018)
+    days=np.arange(1,366)
+    days_leap=np.arange(1,367)
+    leap_year=np.arange(2000,2018,4)
+    for year in years:
+        if str(year) in str(leap_year):
+            for day in days_leap
+                dir_time = str(year) + '/' + str(day) + '/'
+                if not os.path.exists(dest+dir_time):
+                    os.makedirs(dest+dir_time)
+                    sync('https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/61/MOD08_D3/'+dir_time,dest+dir_time,tok)
+                    print "downloaded year:" + str(year) + "day:" + str(day)
+        else:
 
-dest="C:/Users/Neelesh/Desktop"
-tok="D608F41E-5B5F-11E8-B396-C91EAE849760"
-#sync(src,dest,tok)
-import numpy as np
-import os
-years=np.arange(2000,2017,dtype=int)
-days=np.arange(1,366)
-days_leap=np.arange(1,367)
-leap_year=np.arange(2000,2018,4)
-for year in years:
-    if str(year) in str(leap_year):
-        for day in days_leap
-            dir_time = str(year) + '/' + str(day) + '/'
-            if not os.path.exists(dest+dir_time):
-                os.makedirs(dest+dir_time)
-                sync('https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/61/MOD08_D3/'+dir_time,dest+dir_time,tok)
-                print "downloaded year:" + str(year) + "day:" + str(day)
-    else:
-
-        for day in days:
-            dir_time=str(year)+'/'+str(day)+'/'
-            if not os.path.exists(dest+dir_time):
-                os.makedirs(dest+dir_time)
-                sync('https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/61/MOD08_D3/'+dir_time,dest+dir_time,tok)
-                print "downloaded year:"+str(year)+"day:"+str(day)
-
+            for day in days:
+                dir_time=str(year)+'/'+str(day)+'/'
+                if not os.path.exists(dest+dir_time):
+                    os.makedirs(dest+dir_time)
+                    sync('https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/61/MOD08_D3/'+dir_time,dest+dir_time,tok)
+                    print "downloaded year:"+str(year)+"day:"+str(day)
+_main()
 
 
 
