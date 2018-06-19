@@ -2,7 +2,7 @@
 #
 #TODO run these files tomorrow to improve the figures, note the files have been downloaded
 #note the files have been added to "research paper folder on windowns
-
+import matplotlib.pyplot as plt
 
 """here is code for sampling a transition in cloud phase"""
 
@@ -102,6 +102,8 @@ def btd1(mod, rad):
     sds = f.select('Cloud_Phase_Infrared_1km')
     phase2 = sds.get()
     f = SD.SD(rad)
+    lat=np.repeat(np.repeat(f.select('Latitude').get(),5,axis=0),5,axis=1)
+    lon = np.repeat(np.repeat(f.select('Longitude').get(), 5, axis=0), 5, axis=1)
 
     sds = f.select('EV_250_Aggr1km_RefSB')
 
@@ -132,7 +134,7 @@ def btd1(mod, rad):
     #c2=(a2-a1)/(max_val-a1)
     #c1=(1-c2)*a1
     #colour[c]=c1+c2*colour[c]
-    return colour, phase1,phase2,diff,_2105_band,_1600_band,_1200_band,_800,ctt
+    return colour, phase1,phase2,diff,_2105_band,_1600_band,_1200_band,_800,ctt,lat,lon
 mod='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\MYD06_L2.A2015244.1220.006.2015245162222.hdf'
 rad='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\MYD021KM.A2015244.1220.006.2015245152631.hdf'
 cal_file='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\CAL_LID_L2_VFM-Standard-V4-10.2015-09-01T12-20-46ZD.hdf'
@@ -144,11 +146,11 @@ import numpy as np
 
 #TODO here we are recreating the file to correctly sample the file
 
+diff,ctt=btd2(mod)
 
-colour,opt,infrared,diff,_2100,_1600,_1200,_800,ctt=btd1(mod,rad)
 from file_god_contains_functions import calipso_sort
 Image2,height_array,phase,index,lat1,lon1=calipso_sort(cal,400,3500)
-x,y=co_locate(cal_file,mod_file)
+x,y=co_locate(cal,mod)
 #the positions are outputted in the file shown.
 x1=x[0]
 x2=x[1]#x1, x2 are the respective positions of the modis images
@@ -159,9 +161,10 @@ lat = np.repeat(lat1, 5, axis=0)
 lon = np.repeat(lon1, 5, axis=0)
 y=np.array(y)
 c=np.where((y<970)&(y>710))#location of transition case study 1
-#c=np.where((y>650))#location of transition case study 1
+#c=np.where((y>690))#location of transition case study 1
+#c=range(670,770)+range(880,980)
 py.figure()
-py.imshow(Image2[:,y],cmap='viridis')
+py.imshow(Image2[:,y[c]],cmap='viridis')
 py.show()
 width,height=plt.figaspect(0.8)
 
@@ -169,9 +172,10 @@ fig,ax1=plt.subplots(figsize=(width,height),dpi=100)
 #from pylab import *
 c1=np.where(phase[c]==1)
 c2=np.where(phase[c]==2)
-ax1.plot(ctt[x1[c],x2[c]][c1][::2],diff[x1[c],x2[c]][c1][::2],'bo',markersize=5)
-ax1.plot(ctt[x1[c],x2[c]][c2][::2],diff[x1[c],x2[c]][c2][::2],'ro',markersize=5)
-ax1.set_xlim(240,260)
+ax1.plot(ctt[x1[c],x2[c]][c1],diff[x1[c],x2[c]][c1],'bo',markersize=5)
+ax1.plot(ctt[x1[c],x2[c]][c2],diff[x1[c],x2[c]][c2],'ro',markersize=5)
+ax1.set_xlim(240,255)
+ax1.set_ylim(-0.7,0.7)
 ax1.tick_params(axis=u'both', which=u'both', length=3)
 xticks=np.arange(240,256,5)
 ax1.set_xticks(xticks)
@@ -179,10 +183,15 @@ ax1.set_xticklabels(xticks)
 yticks=np.linspace(-0.6,0.6,7)
 ax1.set_yticks(yticks)
 ax1.set_yticklabels(yticks)
-ax1.legend(['CALIOP Liquid','CALIOP Ice'])
-ax1.set_xlabel('MODIS Cloud Top Temperature (K)')
+leg=ax1.legend(['CALIOP Liquid','CALIOP Ice'],loc='upper right',frameon=True)
+leg.get_frame().set_edgecolor('k')
+ax1.set_xlabel('MODIS 11 $\mu m$ Brightness Temperature (K)')
 ax1.set_ylabel('BTD (K)')
+ax1.set_title('(d)',fontsize=12)
+
 fig.show()
+fig.savefig('case_study_2_data.pdf')
+
 
 py.show()
 py.plot(1/(colour[0][x1[c],x2[c]]/_2100[x1[c],x2[c]]))
@@ -200,23 +209,66 @@ py.show()
 from file_god_contains_functions import *
 import matplotlib.pyplot as plt
 #plotting_para()
-
+"""here is the script for creating a colour image"""
 
 #colour image
-
-
+mod='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\MYD06_L2.A2015244.1220.006.2015245162222.hdf'
+rad='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\MYD021KM.A2015244.1220.006.2015245152631.hdf'
+cal="C:\Users\Neelesh\OneDrive\Research Paper\Data_files\CAL_LID_L2_VFM-Standard-V4-10.2008-08-21T13-55-31ZD.hdf"
+mod="C:\Users\Neelesh\OneDrive\Research Paper\Data_files\MYD06_L2.A2008234.1355.006.2013350215759.hdf"
+rad="C:\Users\Neelesh\OneDrive\Research Paper\Data_files\MYD021KM.A2008234.1355.006.2012069224530.hdf"
+colour,opt,infrared,diff,_2100,_1600,_1200,_800,ctt=btd1(mod,rad)
 width, height = plt.figaspect(0.8)
 fig,ax1=plt.subplots(figsize=(width,height),dpi=300)
 #ax1.imshow(colour[:,:,:1350].transpose(1,2,0))
-
+#(700) by (7000
+ax1.set_title('(b)')
 im=ax1.imshow(colour[0,1200:1900,250:950],clim=[0,0.28],cmap='Greys_r')
 cbar = fig.colorbar(im, ticks=[0, 0.1, 0.2])
-cbar.set_label('0.6 $\mu m$  Reflectivity',size=9)
-#cbar.ax1.tick_params(labelsize=10)
+cbar.set_label('0.6 $\mu m$  Reflectivity',size=6)
+cbar.ax.tick_params(labelsize=6)# cbar.ax1.tick_params(labelsize=10)
 fig.show()
 fig.savefig('visible_image_case_study_2.pdf')
 
 
+
+
+
+"""here is the script for showing the satellite overpass"""
+
+colour, phase1,phase2,diff,_2105_band,_1600_band,_1200_band,_800,ctt,lat,lon=btd1(mod,rad)
+Image2,height_array,phase,index,lat1,lon1=calipso_sort(cal,400,3500)
+width, height = plt.figaspect(0.8)
+plt.subplots(figsize=(width,height),dpi=100)
+#plt.figure()
+# setup north polar stereographic basemap.
+# The longitude lon_0 is at 6-o'clock, and the
+# latitude circle boundinglat is tangent to the edge
+# of the map at lon_0. Default value of lat_ts
+# (latitude of true scale) is pole.
+x,y=co_locate(cal,mod)
+a=plt.pcolormesh(lon[:,:1350],lat[:,:1350],colour[0,:,:1350],cmap='Greys_r')
+plt.clim(0,0.3)
+import pylab as py
+#lat = np.repeat(lat1, 5, axis=0)
+#lon = np.repeat(lon1, 5, axis=0)
+y=np.array(y)
+c=np.where((y<970)&(y>710))#location of transition case study 1
+#c=np.where((y>690))#location of transition case study 1
+#c=range(670,770)+range(880,980)
+cbar=plt.colorbar(a,ticks=[0,0.1,0.2])
+plt.plot(lon1[y],lat1[y],label='CALIOP Track',color='r')
+plt.plot(lon1[y[c]],lat1[y[c]],label='Phase Transition',color='b')
+leg=plt.legend(loc='upper right',frameon=True)
+cbar.set_label('0.6 $\mu m$  Reflectivity',size=8)
+cbar.ax.tick_params(labelsize=8)
+#leg=ax1.legend(['CALIOP Liquid','CALIOP Ice'],loc='upper right',frameon=True)
+leg.get_frame().set_edgecolor('k')
+plt.title('(a)',fontsize=12)
+plt.xlabel('Longitude ($\degree$)')
+plt.ylabel('Latitude ($\degree$)')
+fig.show()
+fig.savefig('case_study1_location.pdf')
 
 
 
@@ -274,22 +326,6 @@ ylabel('0.6$\mu m$ reflectivity')
 
 
 
-    #you need to filter the values that are nan
-    figure()
-
-
-    rgb=np.dstack([colour[0],colour[1],colour[2]])
-    color_tuples = rgb.transpose((1,0,2)).reshape((rgb.shape[0]*rgb.shape[1],rgb.shape[2]))
-
-    #color_tuples=color_tuples.reshape(2030,1354,3)
-    plt.imshow(colour[:,:,:1350].transpose(1,2,0)*5,clim=(0,15))
-    #m.set_array(None)
-    plt.show()
-
-    show()
-    # plot the brightness temperature differences too.
-    sds = f.select('EV_500_Aggr1km_RefSB')
-    band_6_r = sds.get()[-1] * sds.attributes()['reflectance_scales'][-1]
 #note the function has been written for simplicity
 
 def figures():
@@ -306,9 +342,9 @@ def figures():
     # of the map at lon_0. Default value of lat_ts
     # (latitude of true scale) is pole.
     m = Basemap(projection='spstere', boundinglat=-30, lon_0=90, resolution='l')
-    X,Y=np.repeat(np.repeat(lat2,5,axis=0),5,axis=1).reshape(2030,1350, order='F'),np.repeat(np.repeat(lon2,5,axis=0),5,axis=1).reshape(2030,1350,order='F')
-    #m.fillcontinents(color='coral', lake_color='aqua')
-    m.pcolormesh(Y,X,colour[1,:,:1350])
+    #X,Y=np.repeat(np.repeat(lat2,5,axis=0),5,axis=1).reshape(2030,1350, order='F'),np.repeat(np.repeat(lon2,5,axis=0),5,axis=1).reshape(2030,1350,order='F')
+    m.fillcontinents(color='coral', lake_color='aqua')
+    #m.pcolormesh(Y,X,colour[1,:,:1350])
     plt.show()
     #doesnt quite work
     #TODO fix the bug in this code
