@@ -2,9 +2,14 @@
 #
 #TODO run these files tomorrow to improve the figures, note the files have been downloaded
 #note the files have been added to "research paper folder on windowns
-import matplotlib.pyplot as plt
+mod='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\MYD06_L2.A2015244.1220.006.2015245162222.hdf'
+rad='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\MYD021KM.A2015244.1220.006.2015245152631.hdf'
+cal_file='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\CAL_LID_L2_VFM-Standard-V4-10.2015-09-01T12-20-46ZD.hdf'
+mod_file=mod
+cal=cal_file
 
-"""here is code for sampling a transition in cloud phase"""
+cal = 'C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\CAL_LID_L2_VFM-Standard-V4-10.2015-09-01T12-20-46ZD.hdf'
+mod = "C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\MYD06_L2.A2015244.1220.006.2015245162222.hdf"  # here is th eforum
 
 cal_file='CAL_LID_L2_VFM-Standard-V4-10.2008-08-21T13-55-31ZD.hdf'#'CAL_LID_L2_VFM-Standard-V4-10.2015-09-01T12-20-46ZD.hdf'
 mod_file='MYD06_L2.A2008234.1355.006.2013350215759.hdf'#MYD021KM.A2015244.1220.006.2015245152631.hdf'
@@ -18,9 +23,12 @@ mod_l2_file=desktop_dir+mod_l2_file
 rad=mod_l2_file
 mod=mod_file
 cal=cal_file
-#the directories are changed for the different files
-#edited for macc
-#the code for the colocate function is shown below
+#the above are simply just the directories
+fig1 = case_study_btd_sim(ax3, cal, mod, [-60, -62], [1000, 3500], '(c)', 'case_study_2_c.pdf')
+fig2 = case_study_btd_sim(ax3, cal, mod, [-59.5, -63], [-500, 3000], '(c)', 'case_study_1_c.pdf')
+%run file_god_contains_functions.py
+import matplotlib.gridspec as gridspec
+
 def co_locate(cal, mod):
     # from calipso_run_updated_to_analyse import Cal2
     try:
@@ -135,73 +143,225 @@ def btd1(mod, rad):
     #c1=(1-c2)*a1
     #colour[c]=c1+c2*colour[c]
     return colour, phase1,phase2,diff,_2105_band,_1600_band,_1200_band,_800,ctt,lat,lon
-mod='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\MYD06_L2.A2015244.1220.006.2015245162222.hdf'
-rad='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\MYD021KM.A2015244.1220.006.2015245152631.hdf'
-cal_file='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\CAL_LID_L2_VFM-Standard-V4-10.2015-09-01T12-20-46ZD.hdf'
-mod_file=mod
-cal=cal_file
+def btd2(mod):
+    from pyhdf import SD
+    f = SD.SD(mod)
+    sds = f.select('Brightness_Temperature')
+    # sds=f.select('Brightness_Temperature')
+    btd = np.repeat(np.repeat((sds.get()[:, 0:406, 0:270] + 15000) * 0.01, 5, axis=1), 5, axis=2).reshape(7, 2030, 1350)
+    diff = btd[0] - btd[1]
+    sds = f.select('cloud_top_temperature_1km')
+    ctt = (sds.get() + 15000) * 0.01
+    sds = f.select('Cloud_Phase_Optical_Properties')
+    phase1 = sds.get()
+    sds = f.select('Cloud_Phase_Infrared_1km')
+    phase2 = sds.get()
+    # f=SD.SD(rad)
+    btd11=btd[1]
 
-import numpy as np
+    # sds=f.select('EV_250_Aggr1km_RefSB')
+
+    # band_600_r=sds.get()[0]*sds.attributes()['reflectance_scales'][0]
+    # band_800_r=sds.get()[1]*sds.attributes()['reflectance_scales'][1]
+
+    # sds=f.select('EV_500_Aggr1km_RefSB')
+
+    # plot the brightness temperature differences too.
+    # sds=f.select('EV_500_Aggr1km_RefSB')
+    # band_6_r=sds.get()[-1]*sds.attributes()['reflectance_scales'][-1]
+
+    # sds=f.select('EV_1KM_Emissive')
+    # band_7_r=(sds.get()[-5]+sds.attributes()['radiance_offsets'][-5])*sds.attributes()['radiance_scales'][-5]
+    return diff, btd11
+def case_study_btd_sim(ax,cal,mod,lat_range,h_range,title_label_3,figname):
+    import matplotlib
+    #plotting_para()
+    import numpy as np
+    latmin=lat_range[1]
+    latmax=lat_range[0]
+    hmin=h_range[0]
+    hmax=h_range[1]
+    from pylab import Line2D
+    import pylab as py
+    diff,ctt=btd2(mod)
+    c=Cal2(cal)
+    lat,lon,Image2,Image3=c.file_sort()
+    import matplotlib.pyplot as plt
+    ##plt.figure()
+    #plt.imshow(Image2,cmap='viridis')
+    #plt.show()
+    x=range(-500,8200,30)+range(8200,20200,60)+range(20200,30100,180)
+    y=np.repeat(lat,5)
+    laty=y
+    X,Y=np.meshgrid(x,y)
+    import numpy.ma as ma
+    Z=Image2
+    Zm = ma.masked_where(np.isnan(Z),Z)
+    #plt.pcolormesh(X,Y,Zm.T)
+
+    #import prettyplotlib as ppl
+    #from prettyplotlib import plt
+    import numpy as np
+    import string
+    #width,height=plt.figaspect(0.8)
+    #fig,ax1=plt.subplots(figsize=(width,height),dpi=100)
+    colorsList = ['indigo','#FFE600']
+    CustomCmap = matplotlib.colors.ListedColormap(colorsList)
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as mpatches
+    import numpy as np
+    red_patch = mpatches.Patch(color='#FFE600', label='CALIOP Ice')
+    blue_patch = mpatches.Patch(color='indigo', label='CALIOP Liquid')
+    red_patch1 = Line2D(range(1), range(1), color='r', marker='o', markersize=4, markerfacecolor="r",
+                        linewidth=0, label='MODIS BTD')  # mpatches.Circle((3,3),color='#0067acff',marker='o')
+
+    #blue_patch1 = mpatches.Patch(color='r', label='Undetermined')
+    x,y=co_locate(cal,mod)
+    ax.tick_params(axis=u'both', which=u'both', length=3)
+    #x,y=co_locate(cal,mod)
+    im=ax.pcolormesh(Y[y,:][::-1],X[y,:][::-1],Zm.T[y,:][::-1],cmap=CustomCmap,alpha=0.6,edgecolor='None')
+    leg=ax.legend(handles=[red_patch,blue_patch,red_patch1], loc='upper right', ncol=1, fontsize=9,handletextpad=0.4, columnspacing=0.4,frameon=True)
+    leg.get_frame().set_edgecolor('k')
+    ax.set_title(title_label_3,fontsize=12)
+    ax.set_ylim([hmin,hmax])
+    ax.set_xlabel('Latitude ($\degree$)')
+    ax.set_ylabel('CALIOP Cloud Height (km)')
+    xticks = np.arange(latmin,latmax+0.5,0.5)[::-1]
+    yticks = range(hmin,hmax,500)
+
+    xticklabels=xticks
+    yticklabels=np.arange(hmin/1000.0,hmax/1000.0,0.5)
+
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels)
+
+    ax.set_yticks(yticks)
+    ax.set_yticklabels(yticklabels)
+    #fig.show()
+    ax.tick_params(axis=u'both', which=u'both', length=3)
+    #ax1.legend()
+    #ax1.set_yticklabels(np.arange(0,500,3500))
+    axn=ax.twinx()
+    axn.plot(laty[y],diff[x[0],x[1]],'ro',markersize=4,linewidth=2)
+    axn.set_ylabel('BTD (K)',color='red')
+    axn.set_ylim([-0.7,0.7])
+    axn.set_xlim([latmin,latmax])
+    axn.tick_params(axis='y',colors='red', length=3)
+    axn.spines['right'].set_color('red')
+    #asp = np.diff(ax.get_xlim())[0] / np.diff(ax.get_ylim())[0]
+    #ax.set_aspect(asp)
+    #ax.spines['top'].set_color('red')
+    #ax2.xaxis.label.set_color('red')
+    #ax2.tick_params(axis='x', colors='red')
+    #fig.show()
+    #fig.savefig(figname)
+    return [ax,axn]
+    """Execution"""
+import os
+def plots_for_each_casestudy(cal,mod,rad,lat_range,h_range,title_label_3,figname,loc,dpi,figaspect):
+    import numpy as np
 
 
-#TODO here we are recreating the file to correctly sample the file
+    #here we extract the data from the required cloud fields
+    import matplotlib.pyplot as plt
+    diff,ctt=btd2(mod)
+    from file_god_contains_functions import calipso_sort
+    colour, phase1,phase2,diff,_2105_band,_1600_band,_1200_band,_800,ctt,lat,lon=btd1(mod,rad)
+    Image2,height_array,phase,index,lat1,lon1=calipso_sort(cal,400,3500)
+    x,y=co_locate(cal,mod)
+    if loc==1:
+        y=np.array(y)
+        c=np.where((y<970)&(y>710))
+    else:
+        y = np.array(y)
+        c = np.where((y > 690))
+    #location of transition case study 1
+    ##location of transition case study 1
+    #c=range(670,770)+range(880,980)
+    x1=x[0]
+    x2=x[1]#x1, x2 are the respective positions of the modis images
+    #it is neccessary to use some of t
 
-diff,ctt=btd2(mod)
-
-from file_god_contains_functions import calipso_sort
-Image2,height_array,phase,index,lat1,lon1=calipso_sort(cal,400,3500)
-x,y=co_locate(cal,mod)
-#the positions are outputted in the file shown.
-x1=x[0]
-x2=x[1]#x1, x2 are the respective positions of the modis images
-#it is neccessary to use some of t
-
-import pylab as py
-lat = np.repeat(lat1, 5, axis=0)
-lon = np.repeat(lon1, 5, axis=0)
-y=np.array(y)
-c=np.where((y<970)&(y>710))#location of transition case study 1
-#c=np.where((y>690))#location of transition case study 1
-#c=range(670,770)+range(880,980)
-py.figure()
-py.imshow(Image2[:,y[c]],cmap='viridis')
-py.show()
-width,height=plt.figaspect(0.8)
-
-fig,ax1=plt.subplots(figsize=(width,height),dpi=100)
-#from pylab import *
-c1=np.where(phase[c]==1)
-c2=np.where(phase[c]==2)
-ax1.plot(ctt[x1[c],x2[c]][c1],diff[x1[c],x2[c]][c1],'bo',markersize=5)
-ax1.plot(ctt[x1[c],x2[c]][c2],diff[x1[c],x2[c]][c2],'ro',markersize=5)
-ax1.set_xlim(240,255)
-ax1.set_ylim(-0.7,0.7)
-ax1.tick_params(axis=u'both', which=u'both', length=3)
-xticks=np.arange(240,256,5)
-ax1.set_xticks(xticks)
-ax1.set_xticklabels(xticks)
-yticks=np.linspace(-0.6,0.6,7)
-ax1.set_yticks(yticks)
-ax1.set_yticklabels(yticks)
-leg=ax1.legend(['CALIOP Liquid','CALIOP Ice'],loc='upper right',frameon=True)
-leg.get_frame().set_edgecolor('k')
-ax1.set_xlabel('MODIS 11 $\mu m$ Brightness Temperature (K)')
-ax1.set_ylabel('BTD (K)')
-ax1.set_title('(d)',fontsize=12)
-
-fig.show()
-fig.savefig('case_study_2_data.pdf')
+    #creating the figure
+    #width,height=plt.figaspect(figaspect)
+    #fig,ax = plt.subplots(2,2,figsize=(figaspect[0],figaspect[1]),dpi=dpi)
+    gs = gridspec.GridSpec(2, 2, width_ratios=[1, 1.08])
+    ax1 = plt.subplot(gs[0,0])
+    ax2 = plt.subplot(gs[0,1])
+    ax3=plt.subplot(gs[1,0])
+    ax4=plt.subplot(gs[1, 1])
+    #x1=ax[0,0]#fig.add_subplot(221)
+    #ax2=ax[0,1]#fig.add_subplot(222)
+    #ax3=ax[1,0]#fig.add_subplot(223)
+    #ax4=ax[1,1]#fig.add_subplot(224)
+    #ax=[ax1,ax2,ax3,ax4]
+   # plt.subplots_adjust(wspace = 0.33,hspace=0.33)
 
 
-py.show()
-py.plot(1/(colour[0][x1[c],x2[c]]/_2100[x1[c],x2[c]]))
-py.show()
-py.figure()
-py.plot(Image2[:,y[c[0]]])
-py.show()
+    #begin our plots with the satellite imagery in ax1
+
+
+    a=ax1.pcolormesh(lon[:,:1350],lat[:,:1350],colour[0,:,:1350],vmin=0,vmax=0.3,cmap='Greys_r')
+    cbar=plt.colorbar(a,ticks=[0,0.1,0.2,0.3,0.4],ax=ax1)
+    ax1.plot(lon1[y],lat1[y],label='CALIOP Track',color='r')
+    ax1.plot(lon1[y[c]],lat1[y[c]],label='Phase Transition',color='b')
+    leg=ax1.legend(loc='upper right',frameon=True)
+    cbar.set_label('0.6 $\mu m$  Reflectivity',size=8)
+    cbar.ax.tick_params(labelsize=8)
+    #leg=ax1.legend(['CALIOP Liquid','CALIOP Ice'],loc='upper right',frameon=True)
+    leg.get_frame().set_edgecolor('k')
+    ax1.set_title('(a)',fontsize=12)
+    ax1.set_xlabel('Longitude ($\degree$)')
+    ax1.set_ylabel('Latitude ($\degree$)')
+    #asp = np.diff(ax1.get_xlim())[0] / np.diff(ax1.get_ylim())[0]
+    #ax1.set_aspect(asp)
+
+
+    #the zoomed in imagery in the second axis
+
+    ax2.set_title('(b)',fontsize=12)
+    im=ax2.imshow(colour[0,1200:1700,250:950],vmin=0,vmax=0.28,cmap='Greys_r',aspect='auto')
+    cbar = plt.colorbar(im, ticks=[0, 0.1, 0.2],ax=ax2)
+    cbar.set_label('0.6 $\mu m$  Reflectivity',size=8)
+    cbar.ax.tick_params(labelsize=8)
+    ax2.set_yticklabels([])
+    ax2.set_xticklabels([])
+    #asp = np.diff(ax2.get_xlim())[0] / np.diff(ax2.get_ylim())[0]
+    #ax2.set_aspect(asp)
+
+
+    #the third image is the complex profile of cloud phase
+    fig1=case_study_btd_sim(ax3,cal,mod,lat_range,h_range,title_label_3,figname)
+
+    #lastly we can sample the data on the location of the transition section
+    diff, ctt=btd2(mod)
+    #from pylab import *
+    c1=np.where(phase[c]==1)
+    c2=np.where(phase[c]==2)
+    ax4.plot(ctt[x1[c],x2[c]][c1],diff[x1[c],x2[c]][c1],'bo',markersize=5)
+    ax4.plot(ctt[x1[c],x2[c]][c2],diff[x1[c],x2[c]][c2],'ro',markersize=5)
+    ax4.set_xlim(240,255)
+    ax4.set_ylim(-0.7,0.7)
+    ax4.tick_params(axis=u'both', which=u'both', length=3)
+    xticks=np.arange(240,256,5)
+    ax4.set_xticks(xticks)
+    ax4.set_xticklabels(xticks)
+    yticks=np.linspace(-0.6,0.6,7)
+    ax4.set_yticks(yticks)
+    ax4.set_yticklabels(yticks)
+    leg=ax4.legend(['CALIOP Liquid','CALIOP Ice'],loc='upper right',frameon=True)
+    leg.get_frame().set_edgecolor('k')
+    ax4.set_xlabel('MODIS 11 $\mu m$ Brightness Temperature (K)')
+    #ax4.set_ylabel('BTD (K)')
+    ax4.set_title('(d)',fontsize=12)
+   #asp = np.diff(ax4.get_xlim())[0] / np.diff(ax4.get_ylim())[0]
+    #ax4.set_aspect(asp)
+
+    plt.show()
+plots_for_each_casestudy(cal, mod, rad,[-60, -62], [1000, 3500], '(c)', 'case_study_1_c.pdf',1,100,[10,10])
 #matching the resolution of the images
 
-
+plots_for_each_casestudy(cal, mod, rad,[-59.5, -63], [-500, 3500], '(c)', 'case_study_1_c.pdf',2,100,0.8)
 #figure()
 #pcolormesh(Y,X,infrared[:,:1350])
 #the function below creates the plotting parameters and is found in file_god_contains_functions
@@ -217,16 +377,7 @@ rad='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_
 cal="C:\Users\Neelesh\OneDrive\Research Paper\Data_files\CAL_LID_L2_VFM-Standard-V4-10.2008-08-21T13-55-31ZD.hdf"
 mod="C:\Users\Neelesh\OneDrive\Research Paper\Data_files\MYD06_L2.A2008234.1355.006.2013350215759.hdf"
 rad="C:\Users\Neelesh\OneDrive\Research Paper\Data_files\MYD021KM.A2008234.1355.006.2012069224530.hdf"
-colour,opt,infrared,diff,_2100,_1600,_1200,_800,ctt=btd1(mod,rad)
-width, height = plt.figaspect(0.8)
-fig,ax1=plt.subplots(figsize=(width,height),dpi=300)
-#ax1.imshow(colour[:,:,:1350].transpose(1,2,0))
-#(700) by (7000
-ax1.set_title('(b)')
-im=ax1.imshow(colour[0,1200:1900,250:950],clim=[0,0.28],cmap='Greys_r')
-cbar = fig.colorbar(im, ticks=[0, 0.1, 0.2])
-cbar.set_label('0.6 $\mu m$  Reflectivity',size=6)
-cbar.ax.tick_params(labelsize=6)# cbar.ax1.tick_params(labelsize=10)
+# cbar.ax1.tick_params(labelsize=10)
 fig.show()
 fig.savefig('visible_image_case_study_2.pdf')
 
@@ -236,39 +387,9 @@ fig.savefig('visible_image_case_study_2.pdf')
 
 """here is the script for showing the satellite overpass"""
 
-colour, phase1,phase2,diff,_2105_band,_1600_band,_1200_band,_800,ctt,lat,lon=btd1(mod,rad)
-Image2,height_array,phase,index,lat1,lon1=calipso_sort(cal,400,3500)
-width, height = plt.figaspect(0.8)
-plt.subplots(figsize=(width,height),dpi=100)
-#plt.figure()
-# setup north polar stereographic basemap.
-# The longitude lon_0 is at 6-o'clock, and the
-# latitude circle boundinglat is tangent to the edge
-# of the map at lon_0. Default value of lat_ts
-# (latitude of true scale) is pole.
-x,y=co_locate(cal,mod)
-a=plt.pcolormesh(lon[:,:1350],lat[:,:1350],colour[0,:,:1350],cmap='Greys_r')
-plt.clim(0,0.3)
-import pylab as py
-#lat = np.repeat(lat1, 5, axis=0)
-#lon = np.repeat(lon1, 5, axis=0)
-y=np.array(y)
-c=np.where((y<970)&(y>710))#location of transition case study 1
-#c=np.where((y>690))#location of transition case study 1
-#c=range(670,770)+range(880,980)
-cbar=plt.colorbar(a,ticks=[0,0.1,0.2])
-plt.plot(lon1[y],lat1[y],label='CALIOP Track',color='r')
-plt.plot(lon1[y[c]],lat1[y[c]],label='Phase Transition',color='b')
-leg=plt.legend(loc='upper right',frameon=True)
-cbar.set_label('0.6 $\mu m$  Reflectivity',size=8)
-cbar.ax.tick_params(labelsize=8)
-#leg=ax1.legend(['CALIOP Liquid','CALIOP Ice'],loc='upper right',frameon=True)
-leg.get_frame().set_edgecolor('k')
-plt.title('(a)',fontsize=12)
-plt.xlabel('Longitude ($\degree$)')
-plt.ylabel('Latitude ($\degree$)')
-fig.show()
-fig.savefig('case_study1_location.pdf')
+
+
+plt.savefig('case_study12_location.pdf')
 
 
 
