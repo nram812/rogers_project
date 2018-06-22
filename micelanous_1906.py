@@ -2,32 +2,31 @@
 #
 #TODO run these files tomorrow to improve the figures, note the files have been downloaded
 #note the files have been added to "research paper folder on windowns
-mod='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\MYD06_L2.A2015244.1220.006.2015245162222.hdf'
-rad='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\MYD021KM.A2015244.1220.006.2015245152631.hdf'
-cal_file='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\CAL_LID_L2_VFM-Standard-V4-10.2015-09-01T12-20-46ZD.hdf'
-mod_file=mod
-cal=cal_file
 
-cal = 'C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\CAL_LID_L2_VFM-Standard-V4-10.2015-09-01T12-20-46ZD.hdf'
-mod = "C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\MYD06_L2.A2015244.1220.006.2015245162222.hdf"  # here is th eforum
 
-cal_file='CAL_LID_L2_VFM-Standard-V4-10.2008-08-21T13-55-31ZD.hdf'#'CAL_LID_L2_VFM-Standard-V4-10.2015-09-01T12-20-46ZD.hdf'
-mod_file='MYD06_L2.A2008234.1355.006.2013350215759.hdf'#MYD021KM.A2015244.1220.006.2015245152631.hdf'
-mod_l2_file='MYD021KM.A2008234.1355.006.2012069224530.hdf'#'MYD06_L2.A2015244.1220.006.2015245162222.hdf'
-mac_dir='/Users/neeleshrampal/Downloads/'
+#cal = 'C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\CAL_LID_L2_VFM-Standard-V4-10.2015-09-01T12-20-46ZD.hdf'
+#mod = "C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\MYD06_L2.A2015244.1220.006.2015245162222.hdf"  # here is th eforum
 
-desktop_dir='C:/Users/Neelesh/OneDrive/Research Paper/Data_files/'#this has been edited
-cal_file=desktop_dir+cal_file
-mod_file=desktop_dir+mod_file
-mod_l2_file=desktop_dir+mod_l2_file
-rad=mod_l2_file
-mod=mod_file
-cal=cal_file
+#cal_file='CAL_LID_L2_VFM-Standard-V4-10.2008-08-21T13-55-31ZD.hdf'#'CAL_LID_L2_VFM-Standard-V4-10.2015-09-01T12-20-46ZD.hdf'
+#mod_file='MYD06_L2.A2008234.1355.006.2013350215759.hdf'#MYD021KM.A2015244.1220.006.2015245152631.hdf'
+#mod_l2_file='MYD021KM.A2008234.1355.006.2012069224530.hdf'#'MYD06_L2.A2015244.1220.006.2015245162222.hdf'
+#mac_dir='/Users/neeleshrampal/Downloads/'
+
+#desktop_dir='C:/Users/Neelesh/OneDrive/Research Paper/Data_files/'#this has been edited
+#cal_file=desktop_dir+cal_file
+#mod_file=desktop_dir+mod_file
+#mod_l2_file=desktop_dir+mod_l2_file
+#rad=mod_l2_file
+#mod=mod_file
+#cal=cal_file
 #the above are simply just the directories
-fig1 = case_study_btd_sim(ax3, cal, mod, [-60, -62], [1000, 3500], '(c)', 'case_study_2_c.pdf')
-fig2 = case_study_btd_sim(ax3, cal, mod, [-59.5, -63], [-500, 3000], '(c)', 'case_study_1_c.pdf')
+#fig1 = case_study_btd_sim(ax3, cal, mod, [-60, -62], [1000, 3500], '(c)', 'case_study_2_c.pdf')
+#fig2 = case_study_btd_sim(ax3, cal, mod, [-59.5, -63], [-500, 3000], '(c)', 'case_study_1_c.pdf')
 %run file_god_contains_functions.py
 import matplotlib.gridspec as gridspec
+import numpy as np
+import pylab as py
+import matplotlib.pyplot as plt
 
 def co_locate(cal, mod):
     # from calipso_run_updated_to_analyse import Cal2
@@ -261,7 +260,7 @@ import os
 def plots_for_each_casestudy(cal,mod,rad,lat_range,h_range,title_label_3,figname,loc,dpi,figaspect):
     import numpy as np
 
-
+    from pylab import Line2D
     #here we extract the data from the required cloud fields
     import matplotlib.pyplot as plt
     diff,ctt=btd2(mod)
@@ -285,17 +284,25 @@ def plots_for_each_casestudy(cal,mod,rad,lat_range,h_range,title_label_3,figname
     #creating the figure
     #width,height=plt.figaspect(figaspect)
     #fig,ax = plt.subplots(2,2,figsize=(figaspect[0],figaspect[1]),dpi=dpi)
-    gs = gridspec.GridSpec(2, 2, width_ratios=[1, 1.08])
-    ax1 = plt.subplot(gs[0,0])
-    ax2 = plt.subplot(gs[0,1])
-    ax3=plt.subplot(gs[1,0])
-    ax4=plt.subplot(gs[1, 1])
+    fig = plt.figure(tight_layout=True,figsize=(figaspect[0],figaspect[1]))
+    gs = gridspec.GridSpec(2, 2,width_ratios=[1, 1.2])
+
+   # ax =
+    #gs = gridspec.GridSpec(2, 2, width_ratios=[1, 1.08])
+    ax1 = fig.add_subplot(gs[0, 0])
+    ax2 = fig.add_subplot(gs[0, 1])
+    ax3 = fig.add_subplot(gs[1, 0])
+    ax4 = fig.add_subplot(gs[1, 1])
+    #ax2 = plt.subplot(gs[0,1])
+    #ax3=plt.subplot(gs[1,0])
+    #ax4=plt.subplot(gs[1, 1])
+    #gs.tight_layout()
     #x1=ax[0,0]#fig.add_subplot(221)
     #ax2=ax[0,1]#fig.add_subplot(222)
     #ax3=ax[1,0]#fig.add_subplot(223)
     #ax4=ax[1,1]#fig.add_subplot(224)
     #ax=[ax1,ax2,ax3,ax4]
-   # plt.subplots_adjust(wspace = 0.33,hspace=0.33)
+    plt.subplots_adjust(wspace = 0.33,hspace=0.33)
 
 
     #begin our plots with the satellite imagery in ax1
@@ -313,6 +320,7 @@ def plots_for_each_casestudy(cal,mod,rad,lat_range,h_range,title_label_3,figname
     ax1.set_title('(a)',fontsize=12)
     ax1.set_xlabel('Longitude ($\degree$)')
     ax1.set_ylabel('Latitude ($\degree$)')
+    ax1.tick_params(axis=u'both', which=u'both', length=3)
     #asp = np.diff(ax1.get_xlim())[0] / np.diff(ax1.get_ylim())[0]
     #ax1.set_aspect(asp)
 
@@ -320,12 +328,39 @@ def plots_for_each_casestudy(cal,mod,rad,lat_range,h_range,title_label_3,figname
     #the zoomed in imagery in the second axis
 
     ax2.set_title('(b)',fontsize=12)
-    im=ax2.imshow(colour[0,1200:1700,250:950],vmin=0,vmax=0.28,cmap='Greys_r',aspect='auto')
-    cbar = plt.colorbar(im, ticks=[0, 0.1, 0.2],ax=ax2)
+    im=ax2.imshow(colour[0,1200:1900,250:950][::-1,:],vmin=0,vmax=0.28,cmap='Greys_r',aspect='auto')
+    cbar = fig.colorbar(im, ticks=[0, 0.1, 0.2],ax=ax2)
     cbar.set_label('0.6 $\mu m$  Reflectivity',size=8)
     cbar.ax.tick_params(labelsize=8)
+    ax2.set_xticks(np.arange(0,700,100))
+    ax2.set_yticks(np.arange(0,700,100))
+    ax2.tick_params(axis=u'both', which=u'both', length=3)
     ax2.set_yticklabels([])
     ax2.set_xticklabels([])
+    import matplotlib.patches as mpatches
+    import numpy as np
+    #red_patch = mpatches.Patch(color='#FFE600', label='CALIOP Ice')
+    #blue_patch = mpatches.Patch(color='indigo', label='CALIOP Liquid')
+    red_patch1 = Line2D(range(1), range(1), color='#FFE600', markerfacecolor='#FFE600',
+                        linewidth=3, label='CALIOP Ice')  # mpatches.Circle((3,3),color='#0067acff',marker='o')
+    red_patch2 = Line2D(range(1), range(1), color='indigo', markerfacecolor='indigo',
+                        linewidth=3, label='CALIOP Liquid')
+    #blue_patch1 = mpatches.Patch(color='r', label='Undetermined')
+    l = Line2D([325, 325],[135+180, 280+180], color='indigo', markerfacecolor='indigo',
+                        linewidth=1.5)
+    l2 = Line2D([325, 325],[280+180, 360+180],color='#FFE600', markerfacecolor='#FFE600',
+                        linewidth=1.5)
+    ax2.add_line(l)
+    ax2.add_line(l2)
+    leg=ax2.legend(handles=[red_patch1,red_patch2], loc='upper right', ncol=1, fontsize=9,handletextpad=0.4, columnspacing=0.4,frameon=True)
+    leg.get_frame().set_edgecolor('k')
+    import matplotlib.cbook as cbook
+    from matplotlib_scalebar.scalebar import ScaleBar
+
+
+    scalebar = ScaleBar(1)  # 1 pixel = 0.2 meter
+    ax2.add_artist(scalebar)
+    plt.show()
     #asp = np.diff(ax2.get_xlim())[0] / np.diff(ax2.get_ylim())[0]
     #ax2.set_aspect(asp)
 
@@ -357,29 +392,29 @@ def plots_for_each_casestudy(cal,mod,rad,lat_range,h_range,title_label_3,figname
    #asp = np.diff(ax4.get_xlim())[0] / np.diff(ax4.get_ylim())[0]
     #ax4.set_aspect(asp)
 
-    plt.show()
-plots_for_each_casestudy(cal, mod, rad,[-60, -62], [1000, 3500], '(c)', 'case_study_1_c.pdf',1,100,[10,10])
+    fig.show()
+    return fig
+cal="C:\Users\Neelesh\OneDrive\Research Paper\Data_files\CAL_LID_L2_VFM-Standard-V4-10.2008-08-21T13-55-31ZD.hdf"
+mod="C:\Users\Neelesh\OneDrive\Research Paper\Data_files\MYD06_L2.A2008234.1355.006.2013350215759.hdf"
+rad="C:\Users\Neelesh\OneDrive\Research Paper\Data_files\MYD021KM.A2008234.1355.006.2012069224530.hdf"
+
+fig1=plots_for_each_casestudy(cal, mod, rad,[-60, -62], [1000, 3500], '(c)', 'case_study_1_c.pdf',1,130,[10,10])
+mod='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\MYD06_L2.A2015244.1220.006.2015245162222.hdf'
+rad='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\MYD021KM.A2015244.1220.006.2015245152631.hdf'
+cal_file='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\CAL_LID_L2_VFM-Standard-V4-10.2015-09-01T12-20-46ZD.hdf'
+mod_file=mod
+cal=cal_file
 #matching the resolution of the images
 
-plots_for_each_casestudy(cal, mod, rad,[-59.5, -63], [-500, 3500], '(c)', 'case_study_1_c.pdf',2,100,0.8)
+fig2=plots_for_each_casestudy(cal, mod, rad,[-59.5, -63], [-500, 3500], '(c)', 'case_study_1_c.pdf',2,150,[10,10])
+fig1.savefig('case_study2_final_dpi=300.pdf',dpi=300)
+fig2.savefig('case_study1_final_dpi=300.pdf',dpi=300)
 #figure()
 #pcolormesh(Y,X,infrared[:,:1350])
 #the function below creates the plotting parameters and is found in file_god_contains_functions
 #TODO note that MODIS tends to over classify ice around the edges
 from file_god_contains_functions import *
 import matplotlib.pyplot as plt
-#plotting_para()
-"""here is the script for creating a colour image"""
-
-#colour image
-mod='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\MYD06_L2.A2015244.1220.006.2015245162222.hdf'
-rad='C:\Users\Neelesh\OneDrive\_2017\Honours Project\Colocation_Data\COLOC_2015_09_01(not done)\MYD021KM.A2015244.1220.006.2015245152631.hdf'
-cal="C:\Users\Neelesh\OneDrive\Research Paper\Data_files\CAL_LID_L2_VFM-Standard-V4-10.2008-08-21T13-55-31ZD.hdf"
-mod="C:\Users\Neelesh\OneDrive\Research Paper\Data_files\MYD06_L2.A2008234.1355.006.2013350215759.hdf"
-rad="C:\Users\Neelesh\OneDrive\Research Paper\Data_files\MYD021KM.A2008234.1355.006.2012069224530.hdf"
-# cbar.ax1.tick_params(labelsize=10)
-fig.show()
-fig.savefig('visible_image_case_study_2.pdf')
 
 
 
