@@ -259,7 +259,8 @@ def case_study_btd_sim(ax,cal,mod,lat_range,h_range,title_label_3,figname):
 import os
 def plots_for_each_casestudy(cal,mod,rad,lat_range,h_range,title_label_3,figname,loc,dpi,figaspect):
     import numpy as np
-
+    from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
+    import matplotlib.font_manager as fm
     from pylab import Line2D
     #here we extract the data from the required cloud fields
     import matplotlib.pyplot as plt
@@ -274,9 +275,10 @@ def plots_for_each_casestudy(cal,mod,rad,lat_range,h_range,title_label_3,figname
     else:
         y = np.array(y)
         c = np.where((y > 690))
+        c = range(670, 770) + range(880, 980)
     #location of transition case study 1
     ##location of transition case study 1
-    #c=range(670,770)+range(880,980)
+    #
     x1=x[0]
     x2=x[1]#x1, x2 are the respective positions of the modis images
     #it is neccessary to use some of t
@@ -357,14 +359,18 @@ def plots_for_each_casestudy(cal,mod,rad,lat_range,h_range,title_label_3,figname
     import matplotlib.cbook as cbook
     from matplotlib_scalebar.scalebar import ScaleBar
 
-
-    scalebar = ScaleBar(1)  # 1 pixel = 0.2 meter
-    ax2.add_artist(scalebar)
+    fontprops = fm.FontProperties(family='sans-serif',size=9)
+    scalebar = ScaleBar(dx=1.0,length_fraction=0.146,height_fraction=0.005,units='km',box_alpha=0.0,frameon=True,location='lower center',font_properties=fontprops.get_fontconfig_pattern(),color='white')  # 1 pixel = 0.2 meter
+    scale=ax2.add_artist(scalebar)
+    ax2.annotate("N", xy=(100, 450), xycoords='data',
+                xytext=(100, 650), textcoords='data',fontsize=9,color='white',
+                arrowprops=dict(facecolor='white',shrink=0.05))
     plt.show()
     #asp = np.diff(ax2.get_xlim())[0] / np.diff(ax2.get_ylim())[0]
     #ax2.set_aspect(asp)
 
-
+    #arrowprops = dict(arrowstyle="->",
+        #              connectionstyle="arc3", facecolor='white'))
     #the third image is the complex profile of cloud phase
     fig1=case_study_btd_sim(ax3,cal,mod,lat_range,h_range,title_label_3,figname)
 
@@ -406,8 +412,167 @@ mod_file=mod
 cal=cal_file
 #matching the resolution of the images
 
-fig2=plots_for_each_casestudy(cal, mod, rad,[-59.5, -63], [-500, 3500], '(c)', 'case_study_1_c.pdf',2,150,[10,10])
-fig1.savefig('case_study2_final_dpi=300.pdf',dpi=300)
+
+#the function below also attempts to plot vertical lines outlining each of the transition regions
+def plots_for_each_casestud2y(cal,mod,rad,lat_range,h_range,title_label_3,figname,loc,dpi,figaspect):
+    import numpy as np
+    from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
+    import matplotlib.font_manager as fm
+    from pylab import Line2D
+    #here we extract the data from the required cloud fields
+    import matplotlib.pyplot as plt
+    diff,ctt=btd2(mod)
+    from file_god_contains_functions import calipso_sort
+    colour, phase1,phase2,diff1,_2105_band,_1600_band,_1200_band,_800,ctt1,lat,lon=btd1(mod,rad)
+    Image2,height_array,phase,index,lat1,lon1=calipso_sort(cal,400,3500)
+    x,y=co_locate(cal,mod)
+    if loc==1:
+        y=np.array(y)
+        c=np.where((y<970)&(y>710))
+    else:
+        y = np.array(y)
+        c = np.where((y > 690))
+        #c = range(670, 770) + range(880, 980)
+    #location of transition case study 1
+    ##location of transition case study 1
+    #
+    x1=x[0]
+    x2=x[1]#x1, x2 are the respective positions of the modis images
+    #it is neccessary to use some of t
+
+    #creating the figure
+    #width,height=plt.figaspect(figaspect)
+    #fig,ax = plt.subplots(2,2,figsize=(figaspect[0],figaspect[1]),dpi=dpi)
+    fig = plt.figure(tight_layout=True,figsize=(figaspect[0],figaspect[1]))
+    gs = gridspec.GridSpec(2, 2,width_ratios=[1, 1.2])
+
+   # ax =
+    #gs = gridspec.GridSpec(2, 2, width_ratios=[1, 1.08])
+    ax1 = fig.add_subplot(gs[0, 0])
+    ax2 = fig.add_subplot(gs[0, 1])
+    ax3 = fig.add_subplot(gs[1, 0])
+    ax4 = fig.add_subplot(gs[1, 1])
+    #ax2 = plt.subplot(gs[0,1])
+    #ax3=plt.subplot(gs[1,0])
+    #ax4=plt.subplot(gs[1, 1])
+    #gs.tight_layout()
+    #x1=ax[0,0]#fig.add_subplot(221)
+    #ax2=ax[0,1]#fig.add_subplot(222)
+    #ax3=ax[1,0]#fig.add_subplot(223)
+    #ax4=ax[1,1]#fig.add_subplot(224)
+    #ax=[ax1,ax2,ax3,ax4]
+    plt.subplots_adjust(wspace = 0.33,hspace=0.33)
+
+
+    #begin our plots with the satellite imagery in ax1
+
+
+    a=ax1.pcolormesh(lon[:,:1350],lat[:,:1350],colour[0,:,:1350],vmin=0,vmax=0.3,cmap='Greys_r')
+    cbar=plt.colorbar(a,ticks=[0,0.1,0.2,0.3,0.4],ax=ax1)
+    ax1.plot(lon1[y],lat1[y],label='CALIOP Track',color='r')
+    ax1.plot(lon1[y[c]],lat1[y[c]],label='Phase Transition',color='b')
+
+    ax1.set_title('(a)',fontsize=12)
+    ax1.set_xlabel('Longitude ($\degree$)')
+    ax1.set_ylabel('Latitude ($\degree$)')
+    ax1.tick_params(axis=u'both', which=u'both', length=3)
+
+    "here we will attempt to plot the boundary region"
+    #lon[:, :1350], lat[:, :1350]
+    lat_min=np.nanmax(lat,axis=0)#shape y dimension
+    where1=np.where(lat==lat_min)
+    loc=[np.where(lat[:,i]==np.nanmax(lat[:,i]))[0][0] for i in range(1355)]
+    lon_min=np.array(lon[loc,range(1355)])
+    where=np.where((lon_min<45)&(lon_min>35))
+    lon_min=lon_min[where]
+    lat_min=lat_min[where]
+    ax1.plot(lon_min,lat_min,'r--',linewidth=3)
+    ax1.plot(lon_min, lat_min+10, 'r--',linewidth=3)
+    leg=ax1.legend(loc='upper right',frameon=True)
+    cbar.set_label('0.6 $\mu m$  Reflectivity',size=8)
+    cbar.ax.tick_params(labelsize=8)
+    #leg=ax1.legend(['CALIOP Liquid','CALIOP Ice'],loc='upper right',frameon=True)
+    leg.get_frame().set_edgecolor('k')
+
+    #asp = np.diff(ax1.get_xlim())[0] / np.diff(ax1.get_ylim())[0]
+    #ax1.set_aspect(asp)
+
+
+    #the zoomed in imagery in the second axis
+
+    ax2.set_title('(b)',fontsize=12)
+    im=ax2.imshow(colour[0,1300:2000,250:950][::-1,:],vmin=0,vmax=0.26,cmap='Greys_r',aspect='auto')
+    cbar = fig.colorbar(im, ticks=[0, 0.1, 0.2],ax=ax2)
+    cbar.set_label('0.6 $\mu m$  Reflectivity',size=8)
+    cbar.ax.tick_params(labelsize=8)
+    ax2.set_xticks(np.arange(0,700,100))
+    ax2.set_yticks(np.arange(0,700,100))
+    ax2.tick_params(axis=u'both', which=u'both', length=3)
+    ax2.set_yticklabels([])
+    ax2.set_xticklabels([])
+    import matplotlib.patches as mpatches
+    import numpy as np
+    #red_patch = mpatches.Patch(color='#FFE600', label='CALIOP Ice')
+    #blue_patch = mpatches.Patch(color='indigo', label='CALIOP Liquid')
+    red_patch1 = Line2D(range(1), range(1), color='#FFE600', markerfacecolor='#FFE600',
+                        linewidth=3, label='CALIOP Ice')  # mpatches.Circle((3,3),color='#0067acff',marker='o')
+    red_patch2 = Line2D(range(1), range(1), color='indigo', markerfacecolor='indigo',
+                        linewidth=3, label='CALIOP Liquid')
+    #blue_patch1 = mpatches.Patch(color='r', label='Undetermined')
+    l = Line2D([325, 325],[135, 240], color='indigo', markerfacecolor='indigo',
+                        linewidth=1.5)
+    l2 = Line2D([325, 325],[240, 360],color='#FFE600', markerfacecolor='#FFE600',
+                        linewidth=1.5)
+    ax2.add_line(l)
+    ax2.add_line(l2)
+    leg=ax2.legend(handles=[red_patch1,red_patch2], loc='upper right', ncol=1, fontsize=9,handletextpad=0.4, columnspacing=0.4,frameon=True)
+    leg.get_frame().set_edgecolor('k')
+    import matplotlib.cbook as cbook
+    from matplotlib_scalebar.scalebar import ScaleBar
+
+    fontprops = fm.FontProperties(family='sans-serif',size=9)
+    scalebar = ScaleBar(dx=1.0,length_fraction=0.146,height_fraction=0.005,units='km',box_alpha=0.0,frameon=True,location='lower center',font_properties=fontprops.get_fontconfig_pattern(),color='white')  # 1 pixel = 0.2 meter
+    scale=ax2.add_artist(scalebar)
+    ax2.annotate("N", xy=(100, 450), xycoords='data',
+                xytext=(100, 650), textcoords='data',fontsize=9,color='white',
+                arrowprops=dict(facecolor='white',shrink=0.05))
+    plt.show()
+    #asp = np.diff(ax2.get_xlim())[0] / np.diff(ax2.get_ylim())[0]
+    #ax2.set_aspect(asp)
+
+    #arrowprops = dict(arrowstyle="->",
+        #              connectionstyle="arc3", facecolor='white'))
+    #the third image is the complex profile of cloud phase
+    fig1=case_study_btd_sim(ax3,cal,mod,lat_range,h_range,title_label_3,figname)
+
+    #lastly we can sample the data on the location of the transition section
+    diff, ctt=btd2(mod)
+    #from pylab import *
+    c1=np.where(phase[c]==1)
+    c2=np.where(phase[c]==2)
+    ax4.plot(ctt[x1[c],x2[c]][c1],diff[x1[c],x2[c]][c1],'bo',markersize=5)
+    ax4.plot(ctt[x1[c],x2[c]][c2],diff[x1[c],x2[c]][c2],'ro',markersize=5)
+    ax4.set_xlim(240,255)
+    ax4.set_ylim(-0.7,0.7)
+    ax4.tick_params(axis=u'both', which=u'both', length=3)
+    xticks=np.arange(240,256,5)
+    ax4.set_xticks(xticks)
+    ax4.set_xticklabels(xticks)
+    yticks=np.linspace(-0.6,0.6,7)
+    ax4.set_yticks(yticks)
+    ax4.set_yticklabels(yticks)
+    leg=ax4.legend(['CALIOP Liquid','CALIOP Ice'],loc='upper right',frameon=True)
+    leg.get_frame().set_edgecolor('k')
+    ax4.set_xlabel('MODIS 11 $\mu m$ Brightness Temperature (K)')
+    #ax4.set_ylabel('BTD (K)')
+    ax4.set_title('(d)',fontsize=12)
+   #asp = np.diff(ax4.get_xlim())[0] / np.diff(ax4.get_ylim())[0]
+    #ax4.set_aspect(asp)
+
+    fig.show()
+    return fig
+fig2=plots_for_each_casestudy(cal, mod, rad,[-59.5, -63], [-500, 3500], '(c)', 'case_study_1_c.pdf',2,130,[10,10])
+fig1.savefig('case_study2_final__actually_donedpi=300.pdf',dpi=300)
 fig2.savefig('case_study1_final_dpi=300.pdf',dpi=300)
 #figure()
 #pcolormesh(Y,X,infrared[:,:1350])
