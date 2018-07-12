@@ -1,5 +1,5 @@
 width, height = plt.figaspect(0.8)  # make sure it is consistent throughout
-fig, ax11 = plt.subplots(figsize=(width, height), nrows=2, ncols=2, dpi=100,sharex=True,sharey=True)
+fig, ax11 = plt.subplots(figsize=(width, height), nrows=2, ncols=2, dpi=300,sharex=True,sharey=True)
 alg=0
 list=['CALIOP','','','']
 list2=[' Ice','Revised Ice', 'Infrared Ice','Optical Properties Ice']
@@ -35,4 +35,4 @@ for ax1 in np.array(ax11).ravel().tolist():
     #ax1.set_ylabel('between y1 and 0')
     fig.show()
     alg=alg+1
-fig.savefig('Distributions_almost_final.pdf')
+fig.savefig('Distributions_final_dpi300.pdf')
